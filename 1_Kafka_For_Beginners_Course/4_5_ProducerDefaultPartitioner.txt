@@ -1,0 +1,33 @@
+====================================================================================
+Producer Default Partitioner
+====================================================================================
+
+    - when key is not null, msg will go through partitioner logic
+    - msg -> producer partitioner logic -> assigned partition
+
+    Key Hashing: mapping a key to a partition
+        - default is murmur2 algorithm
+        targetPartition = Math.abs(Utils.murmur2(keyBytes)) % (numPartitions - 1)
+
+        * if no. of partitions for a topic is changed, it will not guarantee key goes to originally assigned partition
+        * if want to modify no. of partition, then have to create new topic (if using murmur2 algorithm)
+
+
+====================================================================================
+Round Robin Partitioner (default for kafka < v2.4)
+====================================================================================
+
+    - sends data in round-robin fashion to partitioners
+    - inefficient, due to more & smaller batches
+    - leads to more requests made to kafka server + high latency
+
+
+====================================================================================
+Sticky Partitioner (Default partitioner for kafka > v2.4 )
+====================================================================================
+
+    - "stick" to a partition until batch is full or linger.ms has elapsed
+    - then next batch will be sent to next partition
+
+    - leads to larger batches & reduced latency due to fewer requests made to server
+    - over time, records are still spread evenly across partitions

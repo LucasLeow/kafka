@@ -1,0 +1,53 @@
+====================================================================================
+Topic Replication Factor (Replication of Partitions in Brokers)
+====================================================================================        
+
+    - topic should have replication factor > 1 (usually between 2 and 3) esp. in production
+    - if a broker is down, another broker can serve data
+        - Replication factor = 2 = 1 Leader + 1 extra copy
+        - Replication factor = 3 = 1 Leader + 2 extra copies
+
+    eg: Topic A : 2 partitions : replication factor = 2
+
+    * Replication factor cannot be greater than number of brokers in kafka server
+
+    Broker101
+        - Topic A - Partition 0
+    Broker102
+        - Topic A - Partition 1
+        - Topic A - Partition 0 (replication factor = 2)
+    Broker103
+        - Topic A - Partition 1 (replication factor = 2)
+
+    * if Broker102 down, Broker101 & Broker103 still can serve data
+
+
+====================================================================================
+Broker Leader
+====================================================================================
+    
+    - With replication (multiple similar partition in brokers), need a leader
+    - only 1 broker can be leader for a given partition
+
+    * Producers can only send data to broker leader for a given partition
+    * Consumers will read from broker leader for a given partition by default
+        * from Kafka v2.4+, possible for consumer to read from closest replica 
+            - improved latency, decrease network costs if using cloud
+    * In case of broker failures, replicated broker will be the new leader
+
+    eg:
+    Broker101
+        - Topic A - Partition 0 (Leader - receives data from producer)
+    Broker102
+        - Topic A - Partition 1 (Leader - receives data from producer)
+        - Topic A - Partition 0 (replication factor = 2, data replicated) (ISR - in-sync replica)
+    Broker103
+        - Topic A - Partition 1 (replication factor = 2, data replicated) (ISR - in-sync replica)
+
+
+====================================================================================
+Kafka Topic Durability
+====================================================================================
+
+    - For topic replication factor = 3, topic durability = 2 broker loss
+    - replication factor = N, durability = N-1 brokers to recover data

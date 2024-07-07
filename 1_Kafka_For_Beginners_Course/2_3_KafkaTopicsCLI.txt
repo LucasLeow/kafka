@@ -1,0 +1,38 @@
+====================================================================================
+Kafka Topics CLI (Manipulating Topic using Kafka CLI)
+==================================================================================== 
+
+    Recall: Topics = stream of data
+    eg: truck_location | pricing | purchases etc.
+        - each topic has many partitions
+
+    * Topics CLI = used for topic management
+
+    * if configuring on cloud, need to setup SSH credentials
+    1) create playground.config file locally at desired proj dir
+    2) Go to cloud UI & generate config creds
+    3) paste config details inside playground.config
+    4) include "--command-config playground.config" for every command
+
+    eg:
+        kafka-topics.sh --command-config playground.config --bootstrap-server <cloud_url:port> --create --topic <topic_name>
+
+    Commands:
+        - kafka-topics.sh (shows a bunch of topics related command)
+
+    1. Create Kafka Topics
+        - kafka-topics.sh --bootstrap-server LUCASL96.:9092 --create --topic first_topic --partitions 5 --replication-factor 2
+            - (get url (LUCASL96.:9092) from kafka server started from WSL2 window)
+            - first_topic is the <topic_name>
+            - replication factor cannot be greater than number of brokers
+
+    2. List Kafka Topics
+        - kafka-topics.sh --bootstrap-server LUCASL96.:9092 --list
+
+    3. Describe Kafka Topics
+        -  kafka-topics.sh --bootstrap-server LUCASL96.:9092 first_topic --describe
+            - first_topic is the desired topic name
+            - describes the partitions, leader, replicas and in-sync replica (ISR) based on broker_id
+
+    4. Delete Kafka Topic
+        - kafka-topics.sh --bootstrap-server LUCASL96.:9092 --topic first_topic --delete

@@ -1,0 +1,61 @@
+====================================================================================
+Kafka Consumers Groups
+====================================================================================    
+
+    - Within application, can have many consumers listening to Kafka cluster
+    - Consumer Group = many consumers listening to cluster
+    - Each consumer within group reads from exclusive partitions of a given topic
+
+    * possible to have multiple consumer groups reading single topic
+        - with each consumer group having different configuration to partition they are reading from
+
+    eg:
+    Consumer Group 1 (for notification service)
+        - Consumer 1
+            - read Partition 1
+            - read Partition 2
+        - Consumer 2
+            - read Partition 3
+            - read Partition 4
+        - Consumer 3
+            - read Partition 5
+
+    Consumer Group 2 (for location dashboard)
+        - Consumer 1
+            - read partition 1 to 5
+
+    * Possible to have more consumers than partitions
+        - some consumer will not be reading from partition
+            - known as inactive consumer
+        
+    * To create distinct consumer groups, use consumer property: group.id
+
+
+====================================================================================
+Consumer Offsets
+====================================================================================    
+
+    - used as checkpoints in case of consumer failure 
+    - consumer offsets are stored within internal kafka topic known as __consumer_offsets
+    
+    - when consumer consuming data, it should periodically mark an offset (last checkpoint in case of failure)
+    - offset will be committed into __consumer_offsets topic
+    - when restart, kafka broker will only send data from given offset onwards
+
+
+    Types of Consumer offsets:
+        1. At least once (usually preferred)
+            - offsets committed after message is processed
+            (if processing failed, no offsets commited & message will be read again)
+            - if processing goes wrong, message will be read again
+            - can result in duplicate processing of messages. Make sure proceesing is idempotent
+        
+        2. At most once
+            - offsets committed as soon as message received (before processing)
+            - if processing goes wrong, offset will be for the next message already
+            - message will not be read again in case of processing failures
+
+        3. Exactly once
+            - process messages just only once
+            - if topic read from another topic, use transactional API to perform this exact once processing
+            - if to external system workflow, use idempotent consumer to ensure only single reading

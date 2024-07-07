@@ -1,0 +1,40 @@
+====================================================================================
+Producer Retries
+====================================================================================
+
+    - what to do when producer fails writing to kafka clusters
+
+    "retries" setting: (number of times to retry)
+        - defaults to 0 before Kafka v2.0
+        - defaults to 2147483647 for Kafka >= 2.1
+
+    "retry.backoff.ms" (duration before trying out producing ops)
+        - default setting is 100ms
+        - time to wait before retrying producing ops
+        
+    "delivery.timeout.ms=60000" // timeout after 1 minute of trying
+        - instead of number of times, use timeout to control when producing ops should stop
+    
+    * record writing will fail if they can't be acknowledged within delivery.timeout.ms
+
+====================================================================================
+Idempotent Producer (safe producer)
+====================================================================================
+
+    - prevents duplicate of data writes due to network error causing ack issue
+    - kafka will detect duplicate & won't commit twice
+    - default in kafka 3.0
+
+    Default Idempotent Producer config (safe producer)
+        - retries=Integer.MAX_VALUE 
+        - max.in.flight.requests=5 (for max performance while keeping msg ordering)
+        - acks=all
+        - enable.idempotence=true (prevent duplicate writes)
+        - min.insync.replicas=2 (ensure 2 brokers in ISR have data ack)
+        - delivery.timeout.ms=120000 (timeout after 2 mins of producer retries)
+        
+
+    // to configure in Java:
+    producerProps.put("enable.idempotence", true);
+
+

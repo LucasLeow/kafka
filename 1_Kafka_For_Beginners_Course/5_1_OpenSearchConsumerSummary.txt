@@ -1,0 +1,85 @@
+====================================================================================
+Opensearch Consumer project summary
+====================================================================================
+    
+    - Opensearch = open-source fork of ElasticSearch
+
+
+    Consumer setup methods:
+        1. Via SaaS -> bonsai.io
+        2. Run locally via Docker
+        3. Via OpenSearch REST API (provided by OpenSearch team)
+
+    What we are doing in this project:
+        - Create a Kafka Consumer to read information from Wikimedia topic
+        - POST data from kafka consumer to Opensearch db via opensearch obj
+
+====================================================================================
+Project setup steps
+====================================================================================
+
+    1. create new gradle project (kafka-consumer-opensearch)
+    2. create docker-compose.yml in src dir
+
+            version: '3.7'
+            services:
+            opensearch:
+                image: opensearchproject/opensearch:1.2.4
+                environment:
+                discovery.type: single-node
+                plugins.security.disabled: "true" # disable https and logins
+                compatibility.override_main_response_version: "true"
+                ports:
+                - 9200:9200
+                - 9600:9600 # required for Performance Analyzer
+
+            # console at http://localhost:5601/app/dev_tools#/console
+            opensearch-dashboards:
+                image: opensearchproject/opensearch-dashboards:1.2.0
+                ports:
+                - 5601:5601
+                environment:
+                OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
+                DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
+
+    3. Add dependencies in build.gradle for kafka & opensearch dependencies
+    (google for opensearch high level rest client -> gradle groovy dsl)
+
+        dependencies {
+
+            // https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients
+            implementation 'org.apache.kafka:kafka-clients:3.3.1'
+
+            // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+            implementation 'org.slf4j:slf4j-api:1.7.36'
+
+            // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
+            implementation 'org.slf4j:slf4j-simple:1.7.36'
+
+            // https://search.maven.org/artifact/org.opensearch.client/opensearch-rest-high-level-client/1.2.4/jar
+            implementation 'org.opensearch.client:opensearch-rest-high-level-client:1.3.2'
+
+            // https://search.maven.org/artifact/com.google.code.gson/gson/2.9.0/jar
+            implementation 'com.google.code.gson:gson:2.9.0'
+
+        }
+
+        4. create new Java class -> OpenSearchConsumer
+        5. Start OpenSearch with docker-compose.yml
+            - start Docker desktop
+            - click "play" button beside services
+            (starts the opensearch database & web console)
+
+
+        6. Inside OpenSearchConsumer class:
+            - create Opensearch client (see public static RestHighLevelClient createOpenSearchClient())
+            - create Kafka client (see private static KafkaConsumer<String, String> createKafkaConsumer())
+                - paste properties required for kafka consumer
+
+            - set up main code logic
+
+                - create logger
+                - include logic to init openSearchClient & KafkaConsumer client
+                - include logic to poll for data
+                - while polling for data, send record into OpenSearch (using openSearch client)
+

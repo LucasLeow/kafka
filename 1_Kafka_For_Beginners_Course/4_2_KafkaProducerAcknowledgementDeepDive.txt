@@ -1,0 +1,63 @@
+====================================================================================
+Kafka Producer Acknowledgements (acks)
+====================================================================================
+
+    - confirmation when producers successfully writes data to kafka cluster
+
+        acks=0: Producer won't wait for acknowledgement (possible data loss)
+            - producer considers msg as written successful the moment message was sent
+            - does not wait for broker to accept
+            - if broker unavailable / offline, no indication, thus data loss
+            - used only when its ok to lose data (metrics collection)
+            - produces highest throughput (network overhead minimized)
+
+        acks=1: Producer will wait for leader broker acknowledgement (limited data loss)
+            - producer considers msg written successful only when broker leader acknowledges
+            - default setting for kafka 1.0 to 2.8
+            - Flow:
+                - producer send data to broker ldr
+                - ldr writes data to kafka cluster
+                - ldr sends response back to producer
+                - producer register as successful write
+            
+            - if leader broker goes offline but replicas have not replicated data, possible data loss
+            - if ack not received, producer will retry request (network overhead)
+
+        acks=all (or acks=-1): Leader + all replicas acknowledgement (no data loss)
+            - producer considers msg written successful when msg accepted by all in-sync-replicas (ISR)
+            - default for Kafka 3.0+
+            - Flow:
+                - Producer send data to broker ldr
+                - Broker ldr sends data to replica brokers
+                - replica brokers write data to cluster via broker
+                - replica brokers sends response back to ldr
+                - ldr send response back to producer once all response received
+            - ensure no data loss
+
+====================================================================================
+min.insync.replicas property
+====================================================================================
+
+    - min.insync.replicas=1 : only broker ldr needs to successfully ack
+    - min.insync.replicas=2 : broker leader and at least 1 replica need to ack
+
+    * ideally, replication factor = 3, min.insync.replica = 2 (at least 1 replica will have data, else data loss)
+
+====================================================================================
+Summary
+====================================================================================
+
+    - when acks=all,
+    if replication.factor=N
+    min.insync.replicas=M
+    can tolerate up to N - M brokers going down for topic availability processing
+
+    * N != M , else, it means that Kafka does not tolerate any brokers failing. 
+
+    eg:
+        acks=all
+        min.insync.replicas=2 (broker ldr & at least 1  replica must respond)
+        replication.factor=3 (ldr + 2 replica)
+        
+        * tolerate up to 1 broker failure
+

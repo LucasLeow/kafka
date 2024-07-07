@@ -1,0 +1,58 @@
+====================================================================================
+Kafka Schema Registry
+====================================================================================
+
+    - Kafka takes bytes as input & publishes them
+    - no data verification (due to all bytes)
+
+    * Essence of what makes Kafka good (takes bytes as input, doesn't even load into memory)
+    * Use kafka schema registry if want to have data validation & ensure downstream processes doesnt fail
+
+
+    Problem:
+        - producer sends bad data
+        - field gets renamed (binary is different)
+
+        * Consumers will break
+
+    Solution: Schema Registry
+        - data to be self describable
+        - evolve / change data without breaking downstream consumers
+        - need schemas & schema registry
+            - schema = describe how data looks like
+
+    * Schema Registry is a separate component
+        - Producers & consumers needs to communicate with schema registry
+        - schema registry must be able to reject bad data
+        - common data format must be agreed upon (Apache Avro format)
+            - support schemas
+            - support data evolution
+            - needs to be lightweight
+
+        - Schema registry stores & retrieve schemas for Producers & Consumers
+        - Enforces Backward / Forward / Full compatibility on topics
+        - Decrease size of payload of data sent to Kafka
+
+
+====================================================================================
+Architecture Overview with Schema Registry
+====================================================================================
+
+    Source -> Producer (send schema to registry) -> Schema Registry (validate schema) -> Kafka (avro format) -> Consumer -> Schema Registry (retrieve schema) -> Target
+
+    * Apache Avro format is awesome but not easy to use
+        - Protobuf & JSON Schema also can be used
+
+    - Confluent Schema Registry (free + source available (not open source))
+
+    * Will take time to set up schema registry
+
+====================================================================================
+Demo
+====================================================================================
+
+    - start kafka with schema registry & Conduktor using Docker
+        - schema registry must be configured separated in Docker file
+    - create schema
+    - send data using producer
+    - consume data using consumer

@@ -1,0 +1,48 @@
+====================================================================================
+Wikimedia project steps
+====================================================================================   
+
+    1. open docker desktop to ensure daemon running (login)
+    2. open docker-compose.yml file
+        - click on "execute" btn beside services
+
+    (change in platform-config.yml)
+    3. go to localhost:8080
+        - id: admin@conduktor.io
+        - pw: admin 
+    
+
+    endpoint to get stream data: https://stream.wikimedia.org/v2/stream/recentchange
+
+    4. create new module (gradle -> Java -> SDK11) (kafka-producer-wikimedia)
+    
+    5. add dependencies in build.gradle
+            dependencies {
+
+            // https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients
+            implementation 'org.apache.kafka:kafka-clients:3.3.1'
+
+            // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+            implementation 'org.slf4j:slf4j-api:2.0.5'
+
+            // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
+            implementation 'org.slf4j:slf4j-simple:2.0.5'
+
+            // to read java stream
+            // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
+            implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+
+            // https://mvnrepository.com/artifact/com.launchdarkly/okhttp-eventsource
+            implementation 'com.launchdarkly:okhttp-eventsource:2.5.0'
+
+            }
+        
+    (refer to kafka-producer-wikimedia/src/main.java for reference to code logic)
+    6. create new java classes -> WikimediaChangeProducer & WikimediaChangeHandler
+        - create properties for Producer
+        - create new producer
+        - WikimediaChangeHandler implements EventHandler
+            - create kafkaProducer & topic attributes within class
+            - create constructor to take in from Producer class
+
+    7. create wikimedia.recentchange topic in localhost:8080 UI

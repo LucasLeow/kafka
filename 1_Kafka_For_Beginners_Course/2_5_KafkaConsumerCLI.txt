@@ -1,0 +1,93 @@
+====================================================================================
+Kafka Consumer CLI (Setting up Consumer using Kafka CLI)
+==================================================================================== 
+
+    Consumer = reading data from partitions of topics
+
+    Types of consuming:
+        1. consume from tail of topic
+        2. consume from head of topic
+        3. show both key & value in output
+
+    * once command executed to consume, active shell will listen to topic & consume whenever msg sent
+
+    cmd:
+        kafka-console-consumer.sh : get documentation of all consumer-related commands
+
+====================================================================================
+Lag Definition
+====================================================================================
+    - when messages produced (to topic) but not yet consumed
+    - lag = difference in number of message between producer & consumer
+
+====================================================================================
+Consumer commands / steps (kafka-console-consumer.sh)
+====================================================================================
+
+    1) Write desired consumer cmd
+        1.1) consuming from a given topic (cloud hosted server)
+        cmd: kafka-console-consumer.sh --consumer.config playground.config --bootstrap-server <cloud_url:port> --topic <topic_name>
+
+        1.2) consuming from given topic (localhost)
+        cmd: kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic <topic_name>
+
+        1.3) consume from beginning
+        cmd: kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic <topic_name> --from-beginning
+
+        1.4) display key, values, timestamp in consumer
+        cmd:
+            kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic <topic_name>
+            --formatter kafka.tools.DefaultMessageFormatter --property print.timestamp=true
+            --property print.key=true --property print.value=true --property print.partition=true
+            --from-beginning
+
+
+    2) Consuming in Consumer Groups (using --group option to specify consumer group-id)
+        - need to tell Kafka that using consumer group
+        (See how multiple consumers are allocated partitions)
+        eg:
+            5 partitions (0 to 4)
+            3 consumers (1 to 3)
+
+            Consumer 1:
+                - Partition 0
+                - Partition 1
+            
+            Consumer 2:
+                - Partition 2
+                - Partition 3
+            
+            Consumer 3:
+                - Partition 4
+
+        cmd:
+            * open multiple cmdline & execute same command to create consumers in same group
+            * if more consumers than partition, some consumers will not be receiving data
+            kafka-console-consumer.sh --consumer.config playground.config --bootstrap-server <cloud_url:port> --topic <topic_name> --group <group_name>
+            kafka-console-consumer.sh --consumer.config playground.config --bootstrap-server <cloud_url:port> --topic <topic_name> --group my-first-consumer-group
+
+            * if no group name specified, temporary consumer groups will be created just for execution thene deleted
+                - do not use these group ids that have been generated, instead always use predefined name
+    
+
+====================================================================================
+Consumer Group commands / steps (kafka-consumer-groups.sh)
+====================================================================================
+
+    (get more information about consumer groups)
+    - list consumer groups
+    - describe consumer groups
+    -reset offset (to re-read all messages instead of reading last extracted)
+    
+        1. List all Consumer groups
+        cmd: kafka-consumer-groups.sh --command-config playground.config --bootstrap-server <server_url:port> --list
+    
+        2. describe a specific consumer group
+        cmd: kafka-consumer-group.sh --bootstrap-server localhost:9092 --describe --group <group_name>
+
+        3. Reset offsets of topic partition
+        cmd: kafka-consumer-groups.sh --command-config playground.config --bootstrap-server <host_url:port>
+        --group my-first-consumer-group --reset-offsets --to-earliest
+        --topic first_topic --execute
+
+(see documentation for more details for kafka CLI)

@@ -1,0 +1,10 @@
+====================================================================================
+Kafka CLI 
+==================================================================================== 
+
+    - come bundled with Kafka binaries 
+    - need to install apache kafka, then set path correctly to call command anywhere from computer
+
+    * use "--bootstrap-server" option, not "--zookeeper" option due to deprecation
+
+    eg: kafka-topics --bootstrap-server localhost:9092

@@ -1,0 +1,16 @@
+====================================================================================
+max.block.ms & buffer.memory
+====================================================================================
+
+    - when producer produces too fast that broker cannot catch up
+    - records will be buffered in memory
+
+    default: buffer.memory=33554432 (32MB)
+
+    * if buffer is full, producer.send() will start to block
+
+    max.block.ms=60000 (60 seconds default)
+        - for 60s, its okay for .send() to be blocked
+        - if after 60s, still blocked, exception thrown
+
+    * best is to leave as default & analyze code / logic on why overloading is occurring

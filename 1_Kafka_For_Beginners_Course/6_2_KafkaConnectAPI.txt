@@ -1,0 +1,42 @@
+====================================================================================
+Kafka Connect API
+====================================================================================
+
+    - code & connectors set up by other people so don't have to start from scratch
+    - eg : getting data from twitter to kafka
+    - eg: pushing data from kafka to Postgres / MySQL etc.
+
+    1. Source Connector to connect kafka to source
+    2. Sink to connect sink to kafka
+
+
+Architecture:
+
+    Sources -> Connect Cluster (Workers) -> Kafka Cluster (Brokers) -> Connect Cluster (Workers) -> Sinks
+
+    Source Connectors to get data from common data sources
+    Sink Connectors to publish data to common data stores
+
+    * Makes it easy for non-experienced dev to quickly get data reliably through kafka
+    * Don't try to implement own connector, try to see if there are existing connectors
+        - fault tolerance
+        - idempotence
+        - distribution
+        - ordering
+
+====================================================================================
+Steps to setup Connectors
+====================================================================================
+    1. Go to confluent.io/hub/ to search for desired connector / sink
+    2. Download zip from desired connector / sink
+    3. go to github.com/conduktor/kafka-connect-wikimedia
+        - download JAR
+        - download wikimedia.properties
+
+    4. go to desired project dir & create "connectors" dir
+    5. move JAR file to connectors dir
+    6. unzip connector download within same dir (connectors)
+
+    7. run connectors (cd to kafka bin dir)
+        - ./connect-standalone.sh
+

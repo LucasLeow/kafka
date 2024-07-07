@@ -1,0 +1,48 @@
+====================================================================================
+Kafka Producer CLI (Setup Producer using Kafka CLI)
+==================================================================================== 
+    
+    Producer = sending data into topic(s)
+
+    Type of producing:
+        1. Produce without keys (data distributed across all partitions)
+        2. Produce with keys (data distributed, same key goes to same partition)
+
+    cmd:
+        kafka-console-producer.sh : get documentation of all producer-related commands
+
+====================================================================================
+Producing commands / steps
+==================================================================================== 
+
+    1) Write desired Producer cmd
+        1.1) producing to cluster on cloud (with config) (without keys) (key=null)
+            cmd: kafka-console-producer.sh --producer.config playground.config --bootstrap-server <cloud_url:port> --topic <topic_name>
+
+        1.2) producing to unsecure cluster (localhost) (without keys) (key=null)
+            cmd: kafka-console-producer.sh --bootstrap-server localhost:9092 --topic first_topic
+
+        1.3) producing with properties
+            cmd: kafka-console.producer.sh --bootstrap-server localhost:9092 --topic first_topic --producer-property acks=all
+                - acks=all : leader & all replicas must acknowledge (no data loss)
+
+        1.4) producing to non-existent topic
+            cmd: kafka-console-producer.sh --bootstrap-server localhost:9092 --topic <non_existent_topic_name>
+            - by default, auto topic creation is off (best practice is to turn it off)
+            - will throw error : no such file / directory
+            - can edit config/server.properties to set default topic creation parameters (eg. num.partitions=3)
+            - go to linux server & nano kafka_2.13-3.7.0/config/server.properties
+
+        1.5) produce with keys to cluster on cloud
+            cmd: kafka-console-producer.sh --producer.config playground.config --bootstrap-server <cloud_url:port> --topic <topic_name> --property parse.key=true --property key.separator=:
+                - key separator = ':' means <key>:<value>
+            
+        1.6) produce with keys to localhost
+            cmd: kafka-console-producer.sh --bootstrap-server localhost:9092 --topic <topic_name> --property parse.key=true --property key.separator=:
+        
+    2) terminal will become active & messages can be entered to send to topic
+        > Hello World
+        > My name is Lucas
+        > Im learning Kafka
+
+        * to stop sending msg, ctrl + c

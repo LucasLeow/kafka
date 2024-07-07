@@ -1,0 +1,10 @@
+====================================================================================
+Topic Configuration
+====================================================================================
+
+    Common topic configuration:
+        - Replication factor
+        - # of partitions
+        - message size
+        - compression level
+        - 

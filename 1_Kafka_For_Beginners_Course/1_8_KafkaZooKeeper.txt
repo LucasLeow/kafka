@@ -1,0 +1,61 @@
+====================================================================================
+Kafka Zookeepers
+====================================================================================    
+
+    - Zookeeper is essentially a server
+    - Zookeepers manages brokers (keeps a list of them)
+    - Zookeeper performs broker leader election for partitions
+    - Zookeeper sends notification to Kafka in case of changes
+        - topic created / deleted
+        - broker created / dies
+    
+    - Kafka 2.x cannot work without Zookeeper
+    - Kafka 3.x can work without Zookeeper (using Kafka Raft instead)
+    - Kafka 4.x will not have Zookeeper
+
+    - There are odd number of Zookeepers by design (1, 3, 5 ... Zookeepers)
+    - Zookeeper also has a leader (writes), the rest of the Zookeepers are followers (reads)
+    - Zookeeper does not store consumer offsets (no consumer data)
+
+
+    eg:
+
+        Zookeeper 1 (server 1) (follower)
+            - Broker 1
+            - Broker 2
+        Zookeeper 2 (server 2) (leader)
+            - Broker 3
+            - Broker 4
+        Zookeeper 3 (server 3) (follower)
+            - Broker 5
+
+    
+    * Previously, Producers, Consumers, Admin clients are all connected to Zookeeper
+    * Now shifting towards direct connection to brokers instead of Zookeepers
+
+    Problem:
+        - Zookeeper is less secure that Kafka
+        - Zookeeper ports should only be opened to allow traffic from Kafka brokers
+        - Kafka Clients should not be allowed connection to Zookeepers
+
+    * Modern day Kafka developer should never use Zookeeper as config in Kafka clients
+
+====================================================================================
+Kafka KRaft mode
+====================================================================================   
+
+    - Zookeeper has scaling issues when clusters > 100 000 partitions
+    - By removing Zookeeper, Kafka can scale to millions of partitions
+    - improves stability, makes it easier to monitor, support & administer
+    - single security model for whole system
+    - single process to start Kafka
+    - faster controller shutdown & recovery
+
+    * Production ready since Kafka 3.3.1
+    * Kafka 4.0 will only support KRaft (no Zookeeper)
+    * Kafka cluster should be launched in KRaft mode (instead of Zookeeper mode )
+
+
+Kraft Architecture:
+    - No Zookeeper
+    - 1 Broker will serve as leader (Quorum leader)

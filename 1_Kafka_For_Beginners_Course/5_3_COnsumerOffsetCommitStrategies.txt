@@ -1,0 +1,87 @@
+====================================================================================
+Consumer Offset Commit Strategies
+====================================================================================
+
+    - 3 main patterns for committing offsets in consumer app
+
+        1. enable.auto.commit=true (easier + synchronous processing of batches)
+        2. enable.auto.commit=false (manual commit offset, harder to setup)
+        3. enable.auto.commit=false & store offsets externally
+
+====================================================================================
+1. Auto offset commit behaviour
+====================================================================================
+
+    - In Java Consumer API, offsets are regularly committed
+    - at-least-once reading enabled by default
+    - offsets committed when .poll() called and auto.commit.interval.ms has elapsed
+    - consumer calls .commitAsync() under the hood whenever interval elapsed
+
+
+    eg: (auto commit every 5 seconds)
+
+        auto.commit.interval.ms=5000
+        enable.auto.commit=true
+
+        * must ensure that all messages are successfully processed before .poll() called again
+            - else, unprocessed messages will be lost
+
+        * if don't use synchronous processing, will be "at-most-once" behaviour because offsets committed
+        before all data is processed (due to parallel execution)
+
+
+====================================================================================
+2. Manual offset commit behaviour (preferable for async ops)
+====================================================================================
+
+    properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+
+    - set enable.auto.commit=false
+    - manually call consumer.commitAsync() in code to commit offset
+
+    while(true) {
+        batch += consumer.poll(Duration.ofMillis(100))
+        if isReady(batch) {
+            doSomethingSynchronous(batch)
+            consumer.commitAsync()
+        }
+    }
+
+    eg:
+        - accumulating records into a buffer
+        - flushing buffer to database
+        - after flushing then commit offset
+
+====================================================================================
+3. Manual offset commit + store offset externally
+====================================================================================
+
+    - need a custom consumer
+    - assign partitions to consumers at launch manually using .seek() API
+    - need to create model & store offsets in a db table
+    - need to handle cases where rebalancing happens (due to broker / partition changing)
+        - using ConsumerRebalanceListener interface
+    - will get "exactly-once" processing (process data + commit offsets as part of single transaction)
+
+
+====================================================================================
+Consumer Offset Reset Behaviour
+====================================================================================
+
+    - consumers are expected to read from log comtinuously
+    - kafka has retention of 7 days, if more, offsets are invalid
+    - can be controlled with "offset.retention.minutes"
+
+    3 Types of behaviour:
+        1. auto.offset.reset=latest (read from end of log)
+        2. auto.offset.reset=earliest (read from start of log)
+        3. auto.offset.reset=none (throw exception if no offset found)
+
+    * Replaying data for consumers:
+        - take all consumers from a specific group down
+        - use kafka-consumer-groups command to set desired offset
+        - restart consumers
+
+    * set proper data & offset retention period
+    - ensure auto.offset.reset property set as desired
+    - use replay capability in case of unexpected behaviour

@@ -1,0 +1,21 @@
+====================================================================================
+Kafka with Programming Languages
+====================================================================================  
+
+    - Official SDK for Java is Java SDK
+
+    - All other languages is community supported
+        - Scala | C | C++ | Golang | Python | JS | C# (.NET) | Rust | Kotlin | Ruby | Haskell
+        list of recommended SDK: https://www.conduktor.io/kafka/kafka-sdk-list
+
+====================================================================================
+Java with Kafka setup
+====================================================================================  
+
+    1. Download Java > 11 JDK (follow guide below)
+        - Maven (https://www.conduktor.io/kafka/creating-a-kafka-java-project-using-maven-pom-xml)
+    
+    2. Go to Maven Repository -> org.apache.kafka -> kafka-clients -> click on latest version 
+        -> choose mvn / gradle (copy dependency) -> paste dependency in pom.xml / build.gradle
+
+    3. do the same for slf4j-simple & slf4j-api for logging purpose

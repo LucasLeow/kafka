@@ -1,0 +1,68 @@
+====================================================================================
+Consumer Internal threads
+====================================================================================
+
+    - describes how consumer works in kafka
+
+
+    - all consumers in a group communicate with a consumer coordinator (acting broker)
+    - there is "heartbeat" mechanism & "poll" mechanism to detect if consumers are down
+
+    - Heartbeat thread:
+        - consumers sending messages to broker once in awhile to indicate its up
+
+    - Poll thread:
+        - all consumers polling data from kafka brokers (also indicate consumer still up)
+
+    * To avoid issues, consumers are encouraged to process data fast & poll often
+
+
+====================================================================================
+Consumer Heartbeat thread
+====================================================================================
+
+    - heartbeat.interval.ms (default is 3 seconds)
+    - consumers sending data to kafka to indicate its alive
+    - typically set to 1/3 session.timeout.ms
+
+    session.time.ms=45000 (default is 45s in kafka v3.0+, else 10s before v3)
+
+    - if no heartbeat sent, consumer considered dead
+    - if want consumer rebalance quickly, should set heartbeat.interval.ms lower
+
+
+====================================================================================
+Consumer Poll thread (Change settings only if consumer maxes out on throughput)
+====================================================================================
+
+    1) max.poll.interval.ms (default is 5mins)
+    - maximum time betweeen 2 .poll() calls before declaring consumer dead
+
+    - relevant for big data frameworks, where processing of data takes significant time
+        - therefore, may need to increase even more than 5mins
+
+    * used to detect if there is data processing issue (consumer stucked)
+
+    2) max.poll.records (default 500)
+        - controls how many records receive per poll request
+        - if messages (data) small, can increase limit (and if have RAM available)
+        - lower number if taking too much time to process data per poll
+
+    3) fetch.min.bytes (default 1)
+        - how much data to pull on each request
+        - increasing this will increase throughout & reduce request number
+        - causes increased latency
+
+    4) fetch.max.wait.ms (default 1/2 s)
+        - max amount of time kafka broker will block before answering fetch request
+        - if insufficient data to immediately satisfy requirements by fetch.min.bytes
+        - i.e, time given to allow data to accumulate to reach fetch.min.bytes
+
+    5) max.partition.fetch.bytes (default 1MB)
+        - max amount of data per partition that server will return
+        - if have a lot of partitions (100), need a lot of RAM
+
+    6) fetch.max.bytes (default 55MB)
+        - max data returned for each fetch request
+        - if have available memory, increase limit to allow consumer to read more data in each request
+

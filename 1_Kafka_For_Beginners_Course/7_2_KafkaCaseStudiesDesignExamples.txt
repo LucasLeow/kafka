@@ -1,0 +1,181 @@
+====================================================================================
+1. Video Analytics - MovieFlix
+====================================================================================
+
+    Description:
+        - watch TV & Movies on demand
+
+    Desired:
+        - user resume video where they left off
+        - build user profile in real-time
+        - recommend next show to user in real-time
+        - store all data in analytics store
+
+    Topics required:
+        - Show_Position (how far a user has consumed a tv show)
+            - multiple producers (many ppl watching shows)
+            - highly distributed (> 30 partitions)
+            - key = user_id (process by user)
+
+        - Recommendations
+            - lower volume topic
+            - key = user_id (process by user)
+
+    Flow:
+
+    1. Resume video where they left off
+    Video Player -> Video Player Service (Producer) -> Kafka (Show_Position) -> Video Resume Service (Consumer) (latest) -> Video Player
+
+    2. Show Recommendations
+        - which show selected & how far user watched each show
+
+    Show_Position (topic) -> Recommendation Engine in Real time (Kafka Stream) -> Recommendation (topic) -> Recommendation Service (consumer) -> Web UI render
+
+    3. Analytics Store
+    Recommendations (topic) -> Analytics Consumer (Kafka connect) -> Analytics Store (Hadoop)
+
+
+====================================================================================
+2. IoT - GetTaxi
+====================================================================================
+
+    Description:
+        - match taxi-drivers on demand
+
+    Desired:
+        - user match with close by drivers
+        - pricing should "surge" if drivers low or users high
+        - position data before & during ride stored in analytics store (cost computation)
+
+    Topics Required:
+        - User_Position (all positions of users when app opened)
+        - Taxi_Position (all positions of taxi-drivers when app opened)
+            - multiple producers for position topics
+            - highly distributed (> 30 partitions)
+            - key = user_id & taxi_id
+            - data retention not for long
+
+        - Surge_Pricing
+            - surge pricing may differ by region
+            - other topics like weathers / events can be included into KafkaStreams for additional computation
+
+    Flow:
+    1. User matching with close by drivers
+    User App -> User Position Service (producer) -> User_Position (topic)
+    Taxi Driver App -> Taxi Position Service (producer) -> Taxi_Position (topic)
+
+    2. Surge Pricing feature
+    User_Position + Taxi_Position (topics) -> Surge Pricing Engine (Kafka Streams) -> Surge_Pricing (Topic) -> Taxi Cost Service (Consumer) -> User App (render surge pricing)
+
+    3. Store data in analytics store
+Positions + Surge_Pricing -> Analytics Consumer (Kafka Connect) -> Analytics Store (Amazon S3)
+
+
+====================================================================================
+3. CQRS - MySocialMedia
+====================================================================================
+
+    CQRS -> Command Query Responsibility Segregation
+    (Separate read & update operations)
+
+    Description:
+        - allows people to post images / others to react using likes / comments
+
+    Desired:
+        - Users able to post / like / comment
+        - Users see total numbers of likes / comments per post in real time
+        - High volume of data expected on launch
+        - Users able to see trending posts
+
+    Topics Required:
+        - Posts
+            - multiple producers, high volume > 30 partitions
+            - key = user_id
+            - high retention period for data
+        - Likes & Comments
+            - multiple producers, high volume > 30 partitions
+            - key = post_id
+        - Posts_With_Counts
+        - Trending_Posts (Past Hour)
+
+    Flow:
+    1. User post
+    User posts -> Posting Service (Producer) -> Posts (topic)
+
+    2. User likes / comments
+    User likes / Comments -> Likes / Comments Service (Producer) -> Likes & Comments (Topic)
+
+    3. User see total no. of likes / comments per post in real-time
+    Posts + Likes + Comments -> Post Computation Engine (Kafka Streams) -> Post_With_Count (Topic) -> Refresh Feed + Trending Feed Service (Consumer) -> UI
+
+    4. Users see trending posts
+    Posts + Likes + Comments -> Trending Post Engine (Past Hour) (Kafka Streams) -> Trending_Posts (Topic) -> Refresh Feed + Trending Feed Service (Consumer) -> UI
+
+
+====================================================================================
+4. Finance App - MyBank
+====================================================================================
+
+    Details:
+        - real-time banking for users
+        - transaction data already exist in DB
+
+    Desired:
+        - capability to alert users in case of large transactions
+        - thresholds can be defined by users
+        - alerts must be sent in real-time to users
+
+    Topics Required:
+        - Bank_Transactions
+        - User_Settings
+        - User_Alerts
+
+    Flow:
+
+    1. Get Data from DB to kafka
+    DB of Transactions -> Kafka Connect Source (Debezium, CDC - Change Data Capture) -> bank_transactions (topic)
+
+    2. User set threshold
+    User set threshold UI -> App Threshold Service -> User Settings (topic)
+        - better to send events to topic instead of state
+        - event: User <123> enabled threshold at <amount> at <time> on <date>
+        - state: User <123>: threshold <amount> // state less info, unclear
+
+    3. User alerts
+    Bank_Transactions + User_Settings (topics) -> Transaction Detection Engine (Kafka Streams) -> User_Alerts (topic) -> Notification Service (consumer) -> Alert render on App
+
+
+====================================================================================
+Big Data Ingestion using Kafka
+====================================================================================
+
+    - kafka originally created to do big data ingestion
+    - common to have connectors to offload data to kafka then transfer to DB
+
+    * Kafka can serve 2 roles
+        - Speed Layer : real-time applications
+        - Slow Layer : data ingestion into stores for later analytics
+
+
+    Flow:
+
+        Speed Layer:
+        Data producers -> Kafka -> Spark | Storm | Flink -> Real-time analytics
+
+        Slow Layer:
+        Data Producers -> Kafka -> KafkaConnect -> Hadoop | S3 | RDBMS -> Data Science / Audit / Reporting
+
+
+        Data Producers:
+            - Apps / Websites / Financial Systems / Emails / Customer Data
+
+====================================================================================
+Logging & Metrics Aggregation using Kafka
+====================================================================================
+
+    topics:
+        - application_logs
+        - application_metrics
+
+    Flow:
+        Apps -> Log Forwarder / Metric Collector (Producers) -> Kafka topics -> Kafka Connect Sink -> Splunk

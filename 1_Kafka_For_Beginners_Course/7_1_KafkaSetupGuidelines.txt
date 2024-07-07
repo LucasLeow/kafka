@@ -1,0 +1,74 @@
+====================================================================================
+Partition Count & Replication Factor
+====================================================================================
+
+    - 2 most impt parameters when creating topics
+    - changing them midway will impact performance & durability of system
+
+    * If modify partition count, causes key ordering to be possibly lost
+    * if modify replication factor, put pressure on cluster, lead to performance decrease
+
+
+    Partition Count Considerations:
+        - each partition can handle throughput of a few MB/s (consider app & data throughput)
+        - more partitions implies:
+            - better parallelism & throughput
+            - ability to run more consumers in a group (no. of consumers cannot more than no. of partitions)
+                - therefore, more partitions = more possible consumers
+            - can leverage more brokers if larger cluster
+
+    Guidelines for number of partitions:
+
+        1. Small cluster ( < 6 brokers) : No. of partitions = No. of brokers * 3
+        2. Big cluster ( > 12 brokers) : No. of partitions = No. of brokers * 2
+
+        * Run tests, every kafka cluster will have different performance
+        * Don't always create topics with 1000 partitions (measure properly)
+
+
+    Guidelines for Replication factor
+        - should be at least 2 (never ever set 1 RF in prod)
+        - usually 3 (must at least have 3 brokers)
+        - max 4
+
+        Higher replication factor:
+            - better durability (allow for N - 1 broker failures)
+            - better availability
+            - higher latency if (acks=all)
+            - more disk space consumption on system
+
+====================================================================================
+Topic Naming conventions
+====================================================================================
+
+    (snake case)
+    - <message type>_<dataset name>_<data name>_<data format>
+
+    Message type:
+        - logging
+        - queueing
+        - tracking
+        - etl / db
+        - streaming
+        - push
+        - user
+
+    Dataset name:
+        - analogous to database name in traditional RDBMS system
+            - purchases
+            - customers
+            - sales
+            etc.
+
+    data name:
+        - analogous to table name in RDBMS system
+            - first_name
+            - last_name
+            - address
+            etc.
+
+    data format:
+        - avro
+        - json
+        - text
+        - protobuf

@@ -1,0 +1,72 @@
+====================================================================================
+Msg Compression
+====================================================================================
+    
+    - compression can be enabled at producer level (doesn't require config changes)
+    - compression can also be set up in broker
+
+
+    compression.type:
+        - none
+        - gzip
+        - lz4
+        - snappy
+        - zstd (kafka 2.1)
+        - producer (default) : broker takes compressed batch from producer & writes directly to topic
+
+        * if compression.type & compression in producer setting different, batches are first decompressed by broker
+            - then recompressed using specified algorithm
+
+    * bigger message batch = more effective compression
+
+
+
+====================================================================================
+Benefits of compression
+====================================================================================
+
+    - smaller producer request size
+    - faster data transfer over network (lower latency)
+    - higher throughput (more message processed)
+    - better disk utilization in kafka
+
+    * tweak 'linger.ms' & 'batch.size' to manipulate compression
+    * use compression in production
+
+====================================================================================
+Batching Mechanism of Kafka
+====================================================================================
+
+    - by default, producers try to send records as soon as possible
+    
+    max.in.flight.requests.per.connection=5
+        - up to 5 message batches in flight at most
+        - if more messages appear, kafka batches messages then send in batches (up to 5 batches)
+
+    - batching helps improve throughput while maintaining low latency
+        - batching have higher compression ratio = more efficient
+
+
+    - linger.ms=5 : (default is 0), how long to wait until a batch is sent (a small delay allows messages to be accumulated)
+    - batch.size (default is 16KB) : defines the size of batch. if size filled before linger.ms, increase batch.size
+
+    - increasing batch size to 32 / 64 KB help increase compression, throughput & efficiency
+    - any message bigger than batch size will not be batched
+    
+
+    High Throughput Producer
+        - increase linger.ms to allow messages to accumulate
+        - if have memory space, increase batch.size to send larger batches
+        - introduce producer-level compression for more efficiency in send
+
+        properties.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
+            - snappy is good for text-based messages (good balance of CPU / compression ratio)
+        properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, "20");
+        properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, Integer.toString(32*1024)); // 32KBdd
+        
+====================================================================================
+Broker-level Compression
+====================================================================================
+    - applied to all topics processed by that broker
+    - consume extra CPU cycles
+    - only use when unable to use production compression

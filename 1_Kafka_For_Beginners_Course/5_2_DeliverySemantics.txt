@@ -1,0 +1,27 @@
+====================================================================================
+Delivery semantics
+====================================================================================
+
+    1. At Most Once (each message processed at most once)
+        - offsets (id) are committed as soon as message batch is received (not processed)
+        - if message batch processing goes wrong, message is lost (will not re-read again)
+            - i.e, not entire batch processed, only a portion processed
+            eg:
+
+                Batch 1:
+                    - message 1, 2, 3, 4, 5
+                    - processing goes wrong at 3
+
+                (new commit) <- restarts from here, thus msg 4 & 5 is lost
+                Batch 2:
+                    - message 6, 7, 8, 9, 10
+
+    2. At least once (each message processed at least once, may be more)
+        * preferred choice
+        - offsets committed after message batch is processed
+        - if processing goes wrong, message will be re-read again
+        - may lead to duplicate processing, ensure processing is idempotent (using idempotent consumer)
+
+
+    3. Exactly once (ideal scenario)
+        - can be achieved using Transactional API (Kafka streams API)

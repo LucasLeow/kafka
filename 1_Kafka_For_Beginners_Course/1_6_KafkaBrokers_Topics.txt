@@ -1,0 +1,58 @@
+====================================================================================
+Kafka Brokers
+====================================================================================    
+
+    - Kafka cluster consist of multiple brokers
+    - A broker is a single instance / node in the Kafka system
+    - Broker receives & send data
+
+    - Each broker is identified with an ID (integer)    
+        - Broker101
+        - Broker102
+        - Broker103
+
+    - Each broker manages certain topic partitions
+    - Data is distributed across brokers
+
+====================================================================================
+Bootstrap Broker
+====================================================================================    
+    
+    - A broker that allows Kafka clients (producer / consumer) to connect to
+    - once connected to this broker, client will be automatically connect to entire cluster
+
+    * Kafka clients do not need to know all existing brokers for a cluster
+        - just need to know the bootstrap broker then can connect to entire cluster
+
+    * Therefore, Kafka cluster can have as many brokers as desired (3 is good starting default)
+
+
+====================================================================================
+Broker & Topic relationship
+====================================================================================   
+
+    Distributed to Broker in round-robin manner by default
+    eg:
+    Topic A -> 3 partitions
+    Topic B -> 2 partitions
+
+    Broker101
+        - Topic A, partition 0
+        - Topic B, partition 1
+    Broker102
+        - Topic A, partition 1
+        - Topic B partition 0 
+    Broker103
+        - Topic A, partition 2
+
+
+====================================================================================
+Kafka Broker Discovery
+====================================================================================   
+    
+    1. Kafka Client (Producer / consumer) sends connection request + metadata to bootstrap broker
+    2. Bootstrap broker will return list of all brokers in cluster + metadata (which broker has which partition)
+    3. Kafka Client can then connect to actual desired broker
+
+    * Each kafka broker is pretty smart, knows about all other brokers / topics / partitions of Kafka cluster
+

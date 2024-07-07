@@ -1,0 +1,23 @@
+====================================================================================
+Consumer Replica fetching
+====================================================================================
+
+    - kafka consumers by default will read from leader broker of partition
+    - consumer may be in different server than leader broker, leading to higher latency
+
+    Solution:
+        - Kafka Consumer Replica Fetching
+        - configure consumers to read from closest replica
+        - improve latency & decrease network cost (if using cloud)
+            - cost due to transfer of data between different servers
+
+
+    Broker settings:
+        1. "rack.id" property (data center ID) (AZ ID in AWS)
+            eg: rack.id=usw2-az1
+        2. replica.selector.class=org.apache.kafka.common.replica.RackAwareReplicaSelector
+
+    Consumer client settings:
+        1. client.rack (data center ID that consumer is launched on)
+
+

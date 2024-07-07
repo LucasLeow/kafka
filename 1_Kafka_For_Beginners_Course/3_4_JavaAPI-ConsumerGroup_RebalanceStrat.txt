@@ -1,0 +1,74 @@
+====================================================================================
+Java API - Kafka ConsumerGroup Basics
+====================================================================================    
+
+    1. make consumer part of consumer group
+    2. observe partition rebalance mechanisms
+
+
+    Just start the script with multiple instances, code will auto rebalance the partitions
+
+
+====================================================================================
+Partition Rebalance
+====================================================================================    
+    
+    - when consumers join / leave groups, partitions will be reassigned (known as partition rebalance)
+    - can also happen when more partitions are added to a topic
+
+    2 Main types of Strategy
+
+        Strategy 1: Eager Rebalance (Default)
+            - all consumers stop & give up partitions
+            - rejoin consumer group & get new partition assignment (random assignment)
+            - short period where consumer group stops processing (undesireable)
+            - consumers not guaranteed same partitions as before
+
+            eg:
+                - RangeAssignor : assign partitions on per-topic basis (can lead to imbalance)
+                - RoundRobin : assign partitions across all topics in round-robin fashion (optimal balance)
+                - StickyAssignor : balanced like round robin initially then minimizes movement subsequently
+
+        Strategy 2: Cooperative Rebalance (Incremental Rebalance)
+            - reassign small subset of partition betweem consumers
+            - other unaffected consumers can still process from topic uninterrupted
+            - may run several iterations to find a "stable" assignment
+
+            eg:
+                - CooperativeStickyAssignor : same as StickerAssignor but supports cooperative rebalancing
+                    - does not disrupt processing
+
+    
+    Current default:
+        [RangeAssignor, CooperativeStickyAssignor]
+
+        KafkaConnect: already implemented by default
+        KafkaStreams: turned on by default using StreamsPartitionAssignor
+
+====================================================================================
+Static Group Membership
+====================================================================================    
+
+    - by default when consumer leaves group, partitions are all revoked & reassigned to remaining consumers
+    - if consumer rejoins, it will be assigned new member ID and new partition
+
+    * Sometimes, want consumer to get same partition
+
+    Solution: using "group.instance.id" property to make consumer a static member 
+        - (no rebalance when rejoining because partition assigned directly)
+        - need to set "session.timeout.ms", anything within timeout will not trigger rebalance
+
+====================================================================================
+Partition Rebalance Strategy Implementation (Consumer)
+====================================================================================    
+
+    - set in properties (partition.assignment.strategy)
+
+
+    * Edit configuration -> Allow multiple instances for consumer class
+
+    // to change strategy, recommended is CooperativeStickyAssignor
+    consumer_props.setProperty("partition.assignment.strategy", CooperativeStickyAssignor.class.getName());
+
+    // to make consumer static (providing ID to ensure always read back same partition)
+    consumer_props.setProperty("group.instance.id", "id3");

@@ -1,0 +1,44 @@
+====================================================================================
+Setting up Kafka (Windows + Zookeeper)
+====================================================================================    
+
+    * Production-ready Kafka cluster setup takes over 4 hours
+    * Setup will differ based on Windows / Mac / Linux
+
+
+    1) Go to https://kafka.apache.org/downloads
+    2) open linux server -> wget https://downloads.apache.org/kafka/3.7.0/kafka_2.13-3.7.0.tgz
+    3) tar kafka_2.13-3.7.0.tgz
+    4) cd to kafka_2.13-3.7.0/bin then type pwd to get "/home/lucasl96/kafka_2.13-3.7.0/bin"
+    5) cd ~ (cd to home)
+    6) nano .bashrc
+        - scroll to btm of editor
+        - PATH="$PATH:/home/lucasl96/kafka_2.13-3.7.0/bin"
+        - CTRL + X to exit & save
+
+    7) Start Zookeeper using binaries in WSL2 (start single broker in Cluster)
+        execute below cmd in WSL2:
+            - zookeeper-server-start.sh ~/kafka_2.13-3.7.0/config/zookeeper.properties
+            * can edit zookeeper.properties file to edit data dictionary (port change etc.)
+            nano kafka_2.13-3.7.0/config/zookeeper.properties 
+
+    8) Open new WSL2 terminal to start Kafka using binaries in another process in WSL2
+        execute below cmd in WSL2:
+            - kafka-server-start.sh ~/kafka_2.13-3.7.0/config/server.properties
+            * can edit server.properties file to edit data dictionary (server logs file default save etc.)
+            nano kafka_2.13-3.7.0/config/server.properties
+
+
+====================================================================================
+Starting Kafka without Zookeeper (KRaft mode)
+====================================================================================    
+    
+    - direct interaction with Broker (leader) without Zookeeper
+    
+    1. Generate cluster ID & format storage using kafka-storage.sh
+        execute below commands:
+            - kafka-storage.sh random-uuid
+            - kafka-storage.sh format -t <uuid> -c ~/kafka_2.13-3.7.0/config/kraft/server.properties
+
+    2. start Kafka using binaries (don't need open new window)
+        - kafka-server-start.sh ~/kafka_2.13-3.7.0/config/server.properties

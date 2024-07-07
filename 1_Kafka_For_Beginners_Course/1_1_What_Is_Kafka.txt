@@ -1,0 +1,90 @@
+====================================================================================
+What is Kafka
+====================================================================================
+    - for purpose of data transfer (feeding / extracting data)
+    - if have 4 data source & 6 target systems, need to write up to 24 integrations
+    * Kafka is essentially a server acting as middle man where data streams are sent into & sent out
+
+    Integration Difficulties:
+        - Protocol: How data is transported (TCP, HTTP, REST, FTP, JDBC, etc.)
+        - Format: (Binary, JSON, XML, CSV, Avro, Protobuf, etc.)
+        - Schema & Evolution: data schema & shape
+    
+    * Kafka is used as transportation mechanism (middle man)
+        - between data source and target systems
+        - allow for huge amount of data movement
+
+    * Kafka acts as the middleman between data sources & targets
+
+    Typical Flow using Kafka:
+
+        1. Data source sends data to Kafka 
+            - known as Producer (producing data into kafka)
+            - Kafka will have data stream of all data provided by source system
+
+        2. Target system will subscribe to Kafka (consumer / subscriber)
+
+    Facts about Kafka:
+        * created by Linkedin, now opensource maintained by Confluent, IBM, Cloudera
+        - distributed, resilient architecture (upgrade without affecting system), fault tolerant
+        - horizontally scalable (increase no. of brokers)
+            - can scale to millions of messages per second
+        - low latency (less than 10ms, considered real time)
+        
+====================================================================================
+Data source examples (Producers)
+====================================================================================
+
+    - Website events + details
+    - Pricing data (stream)
+    - Financial transactions / data stream
+    - User interactions
+
+====================================================================================
+Target System examples (Consumers)
+====================================================================================
+
+    - Database
+    - Analytics platform
+    - Email
+    - Audit
+
+====================================================================================
+Apache Kafka Use Cases
+====================================================================================
+
+    - Messaging system
+    - Activity tracking
+    - gather metrics from different locations
+    - application logs gathering
+    - stream processing (Kafka streams API)
+    - decouple system dependencies
+    - integration with Spark, Flink, Storm, Hadoop etc.
+    - Microservices pub sub pattern
+
+    Netflix use Kafka to apply recommendations in real time while watch shows
+    Uber use Kafka to gather user, taxi, trip data in real time to compute / forecast demand, compute surge 
+    Linkedin use Kafka to prevent spam, collect user interactions to make better connection recommendations
+
+
+====================================================================================
+Different users of kafka
+====================================================================================
+
+    1. Developers -> write & run apps using Kafka
+    2. Architects -> role of kafka in pipeline
+    3. DevOps -> topics, partitions, multi-brokers setup
+
+
+====================================================================================
+Kafka courses to take
+====================================================================================
+
+    1. Kafka for beginners
+    2. Kafka connect API (dev)
+    3. Kafka Streams API (dev)
+    4. ksqlDB (dev)
+    5. Confluent Components (dev)
+    6. Kafka Security (admin)
+    7. Kafka Monitoring & ops (admin)
+    8. Kafka Cluster Setup & Admin (admin)

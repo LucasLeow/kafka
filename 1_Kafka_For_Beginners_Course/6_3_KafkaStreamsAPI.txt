@@ -1,0 +1,38 @@
+====================================================================================
+Kafka Streams API
+====================================================================================
+
+    - data processing & transformation library within Kafka
+        - Data Transformations
+        - Data Enrichment
+        - Fraud Detection
+        - Monitoring & Alerting
+
+    - Can write as standard Java app
+    - no need to create separate cluster
+    - highly scalable, elastic & fault tolerant
+    - exactly-once capabilities
+    - 1 record at a time processing (no batching)
+    - works for any app size
+
+
+    - if want to perform computation on data
+    eg:
+        - count no. of times change created by bot vs human
+        - analyze number of changes per website
+        - no. of edits / 10s as time series
+
+====================================================================================
+High level architecture
+====================================================================================
+
+    Wikimedia Streams -> Producer -> Kafka Cluster -> Kafka Streams App -> Desired Stats
+
+
+====================================================================================
+Kafka Streams Setup (high level overview)
+====================================================================================
+
+    1. add dependency within build.gradle / pom.xml for kafka streams api
+    2. write code to utilize kafka streams api (StreamsBuilder() | KafkaStreams | Topology etc.)
+    (Kafka streams is an entire course, see KafkaStreams for more info.)

@@ -1,0 +1,31 @@
+====================================================================================
+Kafka Consumers
+====================================================================================
+
+    - consumers read data from topic (identified by name)
+
+    Pull model (consumer pull data from broker)
+    - consumer request data from kafka brokers (get response in return)
+    * not broker pushing data to consumer
+
+    - Consumers knows which broker to read from (which partition of a given topic)
+    - in case of failures, consumer know how to recover
+    - data is read in order from low to high offset (id) within each partition
+        - from 0, 1, 2, 3 ... n
+
+
+====================================================================================
+Consumer Deserializer
+====================================================================================
+    
+    - converts bytes to object / data
+    - consumer must know format of msges in order for proper deserialization
+        
+        - IntegerDeserializer (Float)
+        - StringDeserializer
+        - Avro / Protobuf Deserializer
+
+    * Serialization / Deserialization type must not change during topic lifecycle 
+        - any changes at the Producer will cause the consumer to break
+            - create new topic if data type change
+            - modify logic at consumer to listen & match new data type of topic

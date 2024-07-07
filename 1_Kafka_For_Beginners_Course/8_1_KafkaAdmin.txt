@@ -1,0 +1,158 @@
+====================================================================================
+1. Kafka Cluster Setup
+====================================================================================
+
+    - very first step when setting up Kafka
+    - want multiple brokers in different data centers (racks) to distribute load
+    - want cluster of at least 3 Zookeeper (if using Zookeeper)
+
+    Eg:
+
+    us-east-1a (Availability Zone AZ)
+        - Zookeeper1
+        - Broker1
+        - Broker4
+
+    us-east-1b
+        - Zookeeper2
+            - Broker2
+            - Broker5
+
+    us-east-1c
+        - Zookeeper3
+            - Broker3
+            - Broker6
+
+        
+    * Not straightforward to setup cluster
+        - synchronization
+        - DNS management
+        - sizing setup
+        - failure & backup
+        - monitoring
+        - kafka operations 
+
+    * Need to isolate each Zookeeper & Broker on separate servers   
+        - else, failure causes multiple servers down
+    
+    Alternative: Kafka As a Service (Companies providing setup solutions)
+        - Amazon MSK
+        - Confluent Cloud
+        - Aiven
+        - CloudKarafka
+        - Instaclustr
+
+        * No operational burden
+
+    How Many Brokers?
+        - compute throughput, data retention, replication factor
+        - test for use case
+
+
+====================================================================================
+2. Kafka Monitoring
+====================================================================================
+
+    - The next step after setting up clusters
+    - Kafka exposes metrics through JMX
+    - Kafka Metrics can be hosted through:
+        - ELK (ElasticSearch + Kibana)
+        - Datadog
+        - NewRelic
+        - Prometheus
+
+    Some important metric:
+
+        1. Under Replicated Partitions (URP)
+            - No. of partitions having problems with In-Sync-Replica
+            - If URP high, may indicate high load on system
+        
+        2. Request Handlers
+            - utilization of threads for IO ops / network
+            - gives indication of overall utilization of Kafka broker
+            - if value high, may indicate a need for better broker or more brokers
+        
+        3. Request Timing
+            - how long it takes to reply to requests
+            - lower is better
+        
+    
+====================================================================================
+3. Kafka Operations
+====================================================================================
+
+    Some Common Kafka Operations (throughout lifecycle):
+        - rolling restarts of brokers
+        - updating configurations
+        - rebalancing partitions
+        - increasing replication factor
+        - adding / replacing / removing brokers
+        - upgrading kafka cluster with 0 downtime
+
+====================================================================================
+4. Kafka Security
+====================================================================================
+
+    1. Authentication (SSL & SASL) (Secure Sockets Layer & Simple Authentication & Security Layer)
+        - specify which clients (app) can access cluster
+        - clients prove their identity (login)
+
+        Kafka client -> Authentication -> Kafka Broker (verify) -> Client Authenticated -> Client
+
+        SSL Authentication:
+            - using SSL certificates
+        
+        SASL Authentication:
+            - using username / password (weak but easy to setup)
+            - must enable SSL encryption broker-side as well
+            - PLAINTEXT | SCRAM | GSS API | OAUTHBEARER
+ 
+    2. Authorization
+        - permissions for clients to publish / consume to required topics
+        - using Access Control List (ACLs)
+            - setup by Admin to specify which user got which access to what topics
+
+    3. Encryption
+        - data protection before transmission on network
+        - Data exchanged between clients & brokers is secret to routers during transmission
+
+====================================================================================
+5. Kafka Multi Cluster & Replication of Clusters
+====================================================================================
+
+    - Kafka only operates well in single region
+    - common for enterprise to have kafka clusters around the world
+
+    - good to have some replication between clusters in different regions
+    - replication = consumer + producer
+
+    Tools to perform replication:
+        - Mirror Maker 2 (allows replication of clusters)
+        - Netflix uses Flink (internal app)
+        - Uber uses uReplicator (wrapper of Mirror Maker 2)
+    * try to use Open Source before writing own
+
+    * Replication doesn't preserve offsets, just data
+    - data at an offset in 1 cluster may not be similar to data at same offset in another cluster
+
+====================================================================================
+6. Communication between client & kafka servers
+====================================================================================
+
+    - Kafka server has a few network settings
+        - public IP = 34.56.78.90
+        - private IP = 172.31.9.1
+        - advertised IP = 172.31.9.1
+
+        * client may connect using public IP
+        - Kakfa server will require client to switch to advertised IP
+        - if client not in same private network, advertised IP cannot be found
+        (Then client cannot connect to broker)
+
+        * When server restarts, public IP may change
+        - if set advertised IP to public IP, need to ensure that advertised host is up to date with public IP
+
+    
+    * advertised host can be set using "advertised.listeners" property
+        - if client on private network, set advertised host to be internal IP
+        - if client on public IP, set advertised host to external public IP (cluster will be publicly accessible, may be security risk)

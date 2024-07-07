@@ -1,0 +1,64 @@
+====================================================================================
+Kafka Topics
+====================================================================================
+
+    Topic is a particular stream of data
+
+    - Within a Kafka Cluster can have many topics
+    - can have as many topics as required
+    - each topic must have unique name as identifier
+    - topic can support any kind of message format (JSON | XML etc.)
+    - cannot query topics, instead  
+        - Kafka Producers send topics into cluster
+        - Kafka Consumers read topics from cluster
+
+    eg:
+        Kafka Cluster:
+            Topic 1: Logs data (name: logs)
+            Topic 2: Purchases data (name: purchases)
+            Topic 3: Twitter Tweets (name: tweets)
+
+    * Kafka topics are immutable (once written to partition, cannot be changed)
+        - cannot update / delete data in kafka
+
+====================================================================================
+Kafka Partitions
+====================================================================================
+
+    - Topics are split into many partitions
+    
+    Kafka Topic
+        - Partition 0
+            0 | 1 | 2 | .. | 10 | 11 | ..
+        - Partition 1
+            0 | 1 | 2 | .. | 10 | 11 | ..
+        - Partition 2
+            0 | 1 | 2 | .. | 10 | 11 | ..
+
+    - each message (data) within partition is assigned an incremental id (id also known as offset)
+        - messages (data) are ordered, with id from 0 to n
+        - order is guaranteed within partition, not across partition
+        - offsets (id) will not be re-used even if previous messages (data) has been deleted
+
+    - once data written to partition, it cannot be changed (immutability)
+    - data in kafka is only kept for limited time (default - one week, but configurable)
+
+    - data assigned randomly to a partition unless key provided
+    - can allocate as many partitions as desired within a topic
+
+====================================================================================
+Example of Kafka Topic (truck_gps)
+====================================================================================
+
+    Topic name: truck_gps
+        - fleet of trucks, each truck publish GPS position to Kafka every 20 seconds
+        - each message (data) contains:
+            - truck_id
+            - truck_coordinates (lat & long)
+        
+        - topic will contain positions of all trucks
+        - topic created with 10 partitions (10 arbitrarily chosen)
+
+    Possible consumer:
+        - location dashboard application (track position of all trucks)
+        - notification service (send notification to customers based on truck data)

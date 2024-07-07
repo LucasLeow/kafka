@@ -1,0 +1,99 @@
+====================================================================================
+Kafka Producers
+====================================================================================
+
+    - Producers write data to topics (partitions within topics to be exact)
+    - in order to write data to topics, need producers
+
+    - Producers decides in advanced which partition to write msg to (and which broker has partition)
+    - In case of broker failures, producers will automatically recover
+
+    * Load is balanced to many brokers due to many number of partitions
+
+
+====================================================================================
+Message Keys
+====================================================================================
+
+    - Producers can choose to allocate a key with the message (optional)
+        - key can be string / number / binary etc.
+    
+    - if no key provided, data is loadbalanced round-robin (partition 0 -> partition 1 -> partition 2 etc.)
+    - if key provided, all messages with same key will go to same partition (hashing strategy)
+    - key allocated if require message ordering
+        eg: 
+            - truck_id_1, truck_id_2 always in partition 0
+            - truck_id_3, truck_id_4 always in partition 1 etc.
+
+
+====================================================================================
+Kafka Message anatomy (what's inside a message)
+====================================================================================
+
+    What is within a Kafka Message:
+        1. Key - binary format (can be null)
+        2. Value - binary format (can be null)
+        3. Compression Type (none, gzip, snappy, lz4 etc.)
+        4. Headers (optional) (list of key-value pairs)
+        5. Partition (that msg will be sent to) + offset (msg id)
+        6. Timestamp (system or user set)
+
+    Producers sent Kafka Messages into Topic, specifically into a partition
+    
+    - There are many messages within Kafka partition (messages are ordered within partition)
+        - msg1, msg2, msg3 ... msgN
+    - There are many Kafka partition within Topic
+    - Producers are required to write messages to Topic 
+
+
+====================================================================================
+Kafka Message Serializer (Serialization)
+====================================================================================
+
+    - Kafka only accepts bytes as input from producers & send bytes out as output to consumers
+    - Key & Value within message must be serialized into bytes
+
+    Serialization = Objects / data -> bytes
+    Deserialization = Bytes -> Object / data
+
+    eg:
+    Key = 123 (Integer)
+    Value = "hello, world" (String)
+
+    KeySerializer = IntegerSerializer(Key) -> 01110011
+    ValueSerializer = StringSerializer(Value) -> 0011001101010111001100110000110011
+
+    Kafka Producers have common serializers (for common dtypes)
+        - StringSerializers
+        - Int / Float Serializers
+        - Avro Serializers
+        - Protobuf Serializers
+
+
+====================================================================================
+Kafka Key Hashing process
+====================================================================================
+    
+    Record (data) -> Kafka Producer Partitioner logic -> Partition <n>
+        - default Kafka partitioner uses murmur2 algorithm to get target partition
+
+        targetPartition = Math.abs(Utils.murmur2(keyBytes)) % (numPartitions - 1)
+    * Producers choose partiton where msg is stored using keyBytes within message 
+
+====================================================================================
+StickyPartitioner vs RoundRobin strategy
+====================================================================================
+
+    StickyPartitioner:
+        - used to improve performance
+        - group messages into batches, then send batches into partitions
+
+        eg:
+            - if send 6 messages, producer will be smart enough to batch messages (3 per batch for eg)
+            (batching makes sending msges more efficient)
+                - batch1 -> partition 1
+                - batch2 -> partition 2
+        
+    Round Robin:
+        - send messages, each to 1 partition
+        - No. of batches = No. of messages (inefficient)

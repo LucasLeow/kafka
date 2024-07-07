@@ -1,0 +1,30 @@
+====================================================================================
+Kafka Ecosystem APIs
+====================================================================================
+
+    - APIs written by other devs to help perform tasks efficiently
+    - instead of dealing with low-level direct setup of producers & consumers
+
+    1. Kafka Connect API
+        - Connection between External Source to Kafka
+        - Connection between Kafka to External Sink
+
+    2. Kafka Streams API (eg: compute statistics from data)
+        - transformations between kafka topics
+        - i.e manipulating & moving data between topics
+
+    3. Schema Registry API
+        - helps in using Schema in Kafka
+
+
+====================================================================================
+When to use which API
+====================================================================================
+
+    - if data already exist within a store, then use Kafka Connect API to connect Source to Kafka
+    - if data is to be generated (from sensors etc.), then need to write code for producers
+
+    - if need to manipulate data / perform calculations etc. (use kafka streams)
+
+    - if need to save data to another data source (use kafka connect sink)
+    - if need to send data to other apps / emails (write code for consumer)
