@@ -1,0 +1,25 @@
+====================================================================================
+Handling Large data transfers
+====================================================================================
+
+    - sometimes, have to transfer large data like video / archive files
+
+    Approach 1: Using External Store
+        - store large message outside of Kafka (in database) with reference
+        - send reference via kafka
+        - write custom code (producer / consumer logic) to get reference then connect to external store to retrieve desired large data
+    
+    Approach 2: Sending large message directly via kafka
+        - increase limit of kafka
+
+        Broker:
+            - message.max.bytes
+            - replica.fetch.max.bytes=10485880 (10MB for eg) in server.properties
+
+        Topic: max.message.bytes
+    
+        Consumer Side (must increase fetch size or will crash)
+            - max.partition.fetch.bytes=10485880
+        
+        Producer side (increase request size)
+            - max.request.size=10485880
