@@ -1,0 +1,41 @@
+====================================================================================
+Segments
+====================================================================================
+
+    - Topics are made of partitions
+    - partitions are made of segments
+    - each segment will have range of offsets
+
+    Segment 0
+        - offset 0 to 957
+    Segment 1
+        - offset 958 to 1675 etc.
+    .
+    Segment n (active segment)
+        - Offset 1676 - ? 
+
+    * only 1 segment is active (data being written to) at any given time
+
+====================================================================================
+Segment Settings
+====================================================================================
+
+    * 2 important settings:
+
+        1. log.segment.bytes (default is 1 GB)
+            - max size of a single segment in bytes 
+            - if max size reached, new segment created
+
+        2. log.segment.ms (default is 1 week)
+            - time kafka will wait before closing segment even if not full then open new segment
+    
+====================================================================================
+Indexes
+====================================================================================
+
+    - Each segment comes with 2 indexes (files)
+        1. Offset to position index
+            - helps kafka find where to read from to find a message
+        
+        2. timestamp to offset index
+            - helps kafka find messages with a specific timestamp

@@ -26,3 +26,4 @@ Topic Configuration
 
         # delete config for a particular topic
         kafka-configs --bootstrap-server localhost:9092 --entity-type topics --entity-name <topic_to_configure> --alter --delete-config min.insync.replicas
+        
