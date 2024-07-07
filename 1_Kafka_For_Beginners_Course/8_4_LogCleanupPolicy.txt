@@ -1,0 +1,51 @@
+====================================================================================
+Log Cleanup Policies
+====================================================================================
+
+    - Kafka clusters make data expire based on policies
+    - log cleanup = making data expire
+    - helps delete obsolete data
+    - log cleanup happens on partition segments
+    - more segments = more frequent log cleanups = takes CPU & RAM = performance degradation
+
+====================================================================================
+Policy 1: log.cleanup.policy=delete (default for all topics)
+====================================================================================
+        - delete based on age of data (default 1 week)
+        - delete based on max size (default is -1 (infinite))
+
+        Properties:
+
+            1. log.retention.hours / log.retention.ms / log.retention.minutes (smaller unit has precedence):
+                - no. of hours to keep data for (default is 168 (1 wk))
+                - higher no. = more disk space used due to retaining data for longer period
+                - lower no. = possible data loss if consumers are down for too long (then data deleted)
+
+            2. log.retention.bytes
+                - max size in Bytes for each partition (default is -1 - infinite size)
+
+            Common options:
+                log.retention.hours=168 & log.retention.bytes=-1 (infinite space, 1 week)
+                log.retention.ms=-1 & log.retention.bytes=52428800 (infinite time, 500MB space)
+
+====================================================================================
+Policy 2: log.cleanup.policy=compact (default for __consumer_offsets internal topic)
+====================================================================================
+
+        - keep only the latest key value pair, everything else deleted
+        * can only be set as config, cannot call API to perform log compaction (typically set during topic creation)
+
+        * log compaction ensures log contains at least last known value for a specific key within a partition
+        - useful when require just a snapshot instead of full history
+        - only keep latest "update" for a key within log
+    
+        - offsets are just skipped since offsets are immutable
+        - deleted records can still be seen by consumers for a period of "delete.retention.ms" (default 24hrs)
+    
+        * does not prevent pushing / reading of duplicate data to kafka
+            - remove of duplicates occur only after log retention policy triggered
+
+            
+            1. min.compaction.lag.ms (default 0): time to wait before message can be compacted
+            2. delete.retention.ms (default 24hrs) : time to wait before actually deleting data from servers
+            3. min.cleanable.dirty.ratio (default 0.5) : higher value = less cleaning but more efficient
