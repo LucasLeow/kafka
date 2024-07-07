@@ -2,9 +2,27 @@
 Topic Configuration
 ====================================================================================
 
+    * Brokers have default topic config
+    - sometimes, need to modify config to improve performance & topic behaviour
+
     Common topic configuration:
         - Replication factor
         - # of partitions
         - message size
         - compression level
-        - 
+        - log cleanup policy
+        - min insync replica
+
+    
+    List of config: https://kafka.apache.org/documentation/#brokerconfigs
+
+
+    Command:
+        # add a new config for min.insync.replica to a particular topic
+        kafka-configs --bootstrap-server localhost:9092 --entity-type topics --entity-name <topic_to_configure> --alter --add-config min.insync.replicas=2
+
+        # view custom config set for a particular topic
+        kafka-configs --bootstrap-server localhost:9092 --entity-type topics --entity-name <topic_to_configure> --describe
+
+        # delete config for a particular topic
+        kafka-configs --bootstrap-server localhost:9092 --entity-type topics --entity-name <topic_to_configure> --alter --delete-config min.insync.replicas
